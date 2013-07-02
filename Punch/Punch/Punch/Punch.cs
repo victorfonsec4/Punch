@@ -18,6 +18,8 @@ namespace Punch
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        int height;
+        int width;
 
         public Punch()
         {
