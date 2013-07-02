@@ -19,12 +19,18 @@ namespace Punch
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        int height;
-        int width;
+        Texture2D inimigoText;
+        List<Inimigo> inimigos;
+        Random rnd;
+        bool criou;
+        int height = 480;
+        int width = 720;
 
         public Punch()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferHeight = height;
+            graphics.PreferredBackBufferWidth = width;
             Content.RootDirectory = "Content";
         }
 
@@ -37,7 +43,9 @@ namespace Punch
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            inimigos = new List<Inimigo>();
+            rnd = new Random();
+            criou = false;
             base.Initialize();
         }
 
@@ -49,6 +57,7 @@ namespace Punch
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            inimigoText = Content.Load<Texture2D>("Inimigo");
 
             // TODO: use this.Content to load your game content here
         }
@@ -74,6 +83,23 @@ namespace Punch
                 this.Exit();
 
             // TODO: Add your update logic here
+            if ((int)gameTime.TotalGameTime.Milliseconds % 500 == 0 && !criou)
+            {
+                criou = true;
+                inimigos.Add(new Inimigo(rnd.Next(3 * inimigoText.Width / 2, width - 3 * inimigoText.Width / 2), rnd.Next(3 * inimigoText.Height / 2, height - 3 * inimigoText.Height / 2), inimigoText));
+            }
+            if ((int)gameTime.TotalGameTime.Milliseconds % 500 != 0 && criou)
+                criou = false;
+            foreach (Inimigo i in inimigos)
+            {
+                i.Update();
+                if (i.Scale > 2)
+                {
+                    inimigos.Remove(i);
+                    break;
+                }
+            }
+
 
             base.Update(gameTime);
         }
@@ -85,8 +111,13 @@ namespace Punch
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
             // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            foreach (Inimigo i in inimigos)
+            {
+                i.Draw(spriteBatch);
+            }
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }

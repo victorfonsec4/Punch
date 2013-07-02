@@ -3,13 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Punch
 {
     class Inimigo
     {
-        Vector2 pos;
-        float scale;
+        private Vector2 pos;
+        private float scale;
+        private Texture2D texture;
 
+        public Inimigo(float x, float y, Texture2D texture)
+        {
+            pos.X = x;
+            pos.Y = y;
+            this.texture = texture;
+            scale = 0;
+        }
+
+        public float Scale
+        {
+            get { return scale; }
+        }
+
+        public void Update()
+        {
+            scale += 0.03f;
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(texture, pos, null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 1);
+        }
     }
 }
