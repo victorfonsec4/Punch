@@ -21,16 +21,21 @@ namespace Punch
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+<<<<<<< HEAD
         Texture2D inimigoText;
         List<Inimigo> inimigos;
         Random rnd;
         bool criou;
         int height = 480;
         int width = 720;
+=======
+        int height;
+        int width;
         KinectSensor kinect;
         Joint rightHand;
         Skeleton[] skeletonData;
         Skeleton skeleton;
+>>>>>>> fff7ddd79ab76e8cd450ce03299d3861131035a3
 
         public Punch()
         {
@@ -49,14 +54,17 @@ namespace Punch
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+<<<<<<< HEAD
             inimigos = new List<Inimigo>();
             rnd = new Random();
             criou = false;
+=======
             kinect = KinectSensor.KinectSensors[0];
             kinect.Start();
             kinect.SkeletonStream.Enable();
             kinect.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(skeletonReady);
 
+>>>>>>> fff7ddd79ab76e8cd450ce03299d3861131035a3
             base.Initialize();
         }
 
@@ -122,7 +130,6 @@ namespace Punch
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             foreach (Inimigo i in inimigos)
