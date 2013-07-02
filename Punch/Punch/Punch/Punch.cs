@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Kinect;
+using System.Diagnostics;
 
 namespace Punch
 {
@@ -21,6 +23,10 @@ namespace Punch
         SpriteBatch spriteBatch;
         int height;
         int width;
+        KinectSensor kinect;
+        Joint rightHand;
+        Skeleton[] skeletonData;
+        Skeleton skeleton;
 
         public Punch()
         {
@@ -37,6 +43,10 @@ namespace Punch
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            kinect = KinectSensor.KinectSensors[0];
+            kinect.Start();
+            kinect.SkeletonStream.Enable();
+            kinect.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(skeletonReady);
 
             base.Initialize();
         }
@@ -89,6 +99,35 @@ namespace Punch
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
+        }
+
+        void skeletonReady(object sender, AllFramesReadyEventArgs imageFrames)
+        {
+            SkeletonFrame skeletonFrame = imageFrames.OpenSkeletonFrame();
+            if (skeletonFrame != null)
+            {
+                if ((skeletonData == null) || (skeletonData.Length != skeletonFrame.SkeletonArrayLength))
+                {
+                    skeletonData = new Skeleton[skeletonFrame.SkeletonArrayLength];
+                }
+                skeletonFrame.CopySkeletonDataTo(skeletonData);
+            }
+
+            if (skeletonData != null)
+            {
+                foreach (Skeleton skel in skeletonData)
+                {
+                    if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                    {
+                        rightHand = skel.Joints[JointType.HandRight];
+                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                        {
+                            skeleton = skel;
+                        }
+                    }
+                }
+            }
+
         }
     }
 }
