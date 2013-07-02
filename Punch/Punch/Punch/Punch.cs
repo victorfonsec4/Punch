@@ -29,8 +29,10 @@ namespace Punch
         int width = 720;
         KinectSensor kinect;
         Joint rightHand;
+        Joint leftHand;
         Skeleton[] skeletonData;
         Skeleton skeleton;
+        Player player;
 
         public Punch()
         {
@@ -56,7 +58,7 @@ namespace Punch
             kinect.Start();
             kinect.SkeletonStream.Enable();
             kinect.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(skeletonReady);
-
+            player = new Player(100);
             base.Initialize();
         }
 
@@ -89,10 +91,13 @@ namespace Punch
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            Vector2 impactPoint;
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
-
+            
+            impactPoint = player.Update(new Vector3(rightHand.Position.X, rightHand.Position.Y, rightHand.Position.Z), new Vector3 (leftHand.Position.X, leftHand.Position.Y, leftHand.Position.Z) );
+            Debug.WriteLine("ImpactPoint(x,y): "+ impactPoint.X + ", " + impactPoint.Y+")");
             // TODO: Add your update logic here
             if ((int)gameTime.TotalGameTime.Milliseconds % 500 == 0 && !criou)
             {
@@ -153,6 +158,7 @@ namespace Punch
                     if (skel.TrackingState == SkeletonTrackingState.Tracked)
                     {
                         rightHand = skel.Joints[JointType.HandRight];
+                        leftHand = skel.Joints[JointType.HandLeft];
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
                             skeleton = skel;
