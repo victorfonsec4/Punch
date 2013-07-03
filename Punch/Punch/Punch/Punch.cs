@@ -26,6 +26,7 @@ namespace Punch
         List<Inimigo> removeList;
         Random rnd;
         bool criou;
+        bool red;
         Vector2 impactPoint;
         int height = 480;
         int width = 720;
@@ -99,7 +100,9 @@ namespace Punch
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
-            
+
+            red = false;
+
             impactPoint = player.Update(new Vector3(rightHand.Position.X, rightHand.Position.Y, rightHand.Position.Z), new Vector3 (leftHand.Position.X, leftHand.Position.Y, leftHand.Position.Z), gameTime);
             impactPoint.X += 1;
             impactPoint.Y += 1;
@@ -124,6 +127,7 @@ namespace Punch
                 if (i.Scale > 2)
                 {
                     player.health--;
+                    red = true;
                     removeList.Add(i);
                 }
                 if (i.Hit(impactPoint))
@@ -145,7 +149,10 @@ namespace Punch
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            if(red)
+                GraphicsDevice.Clear(Color.Red);
+            else
+                GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
