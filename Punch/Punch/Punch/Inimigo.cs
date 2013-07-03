@@ -28,7 +28,7 @@ namespace Punch
 
         public void Update()
         {
-            scale += 0.02f;
+            scale += 0.015f;
         }
 
         public void Draw(SpriteBatch spriteBatch)

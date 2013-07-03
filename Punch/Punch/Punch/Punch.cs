@@ -27,7 +27,7 @@ namespace Punch
         Random rnd;
         bool criou;
         bool red;
-        Vector2 impactPoint, blueBallPos;
+        Vector2 redBallPos, blueBallPos;
         int height = 480;
         int width = 720;
         KinectSensor kinect;
@@ -35,10 +35,14 @@ namespace Punch
         Joint leftHand;
         Skeleton[] skeletonData;
         Skeleton skeleton;
-        Player player;
+        int health;
         Texture2D redball;
         Texture2D blueball;
         float maxX, minX, maxY, minY;
+        int score;
+        SpriteFont fonte;
+        int spawnTime;
+        int lastScore;
 
         public Punch()
         {
@@ -59,17 +63,20 @@ namespace Punch
             // TODO: Add your initialization logic here
             inimigos = new List<Inimigo>();
             removeList = new List<Inimigo>();
+            health = 100;
             rnd = new Random();
             criou = false;
             kinect = KinectSensor.KinectSensors[0];
             kinect.Start();
             kinect.SkeletonStream.Enable();
             kinect.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(skeletonReady);
-            player = new Player(100);
             maxX = -10;
             maxY = -10;
             minY = 100;
             minX = 100;
+            score = 0;
+            spawnTime = 5000;
+            lastScore = 0;
             base.Initialize();
         }
 
@@ -84,6 +91,7 @@ namespace Punch
             inimigoText = Content.Load<Texture2D>("Inimigo");
             redball = Content.Load<Texture2D>("redball");
             blueball = Content.Load<Texture2D>("blueball");
+            fonte = Content.Load<SpriteFont>("fonte");
 
             // TODO: use this.Content to load your game content here
         }
@@ -109,21 +117,20 @@ namespace Punch
                 this.Exit();
 
             red = false;
-
-            impactPoint = player.Update(new Vector3(rightHand.Position.X, rightHand.Position.Y, rightHand.Position.Z), new Vector3 (leftHand.Position.X, leftHand.Position.Y, leftHand.Position.Z), gameTime);
-            impactPoint.X +=(float)1.0079678;
-            impactPoint.X /= (float)2.0539064;
-            impactPoint.X *= GraphicsDevice.Viewport.Width;
-            impactPoint.Y *= -1;
-            impactPoint.Y +=(float) 0.8476187;
-            impactPoint.Y /= (float)1.02592262;
-            impactPoint.Y *= GraphicsDevice.Viewport.Height;
+            redBallPos = new Vector2(leftHand.Position.X, leftHand.Position.Y);
+            redBallPos.X +=(float)0.5997291;
+            redBallPos.X /= (float)0.7665651;
+            redBallPos.X *= GraphicsDevice.Viewport.Width;
+            redBallPos.Y *= -1;
+            redBallPos.Y += (float)0.8524219;
+            redBallPos.Y /= (float)0.8524219;
+            redBallPos.Y *= GraphicsDevice.Viewport.Height;
             blueBallPos = new Vector2(rightHand.Position.X, rightHand.Position.Y*-1);
-            blueBallPos.X +=(float) 1.0079678;
-            blueBallPos.X /= (float)2.0539064;
+            blueBallPos.X += (float)0.5997291;
+            blueBallPos.X /= (float)0.7665651;
             blueBallPos.X *= GraphicsDevice.Viewport.Width;
-            blueBallPos.Y +=(float) 0.8476187;
-            blueBallPos.Y /= (float)1.02592262;
+            blueBallPos.Y += (float)0.8524219;
+            blueBallPos.Y /= (float)0.8524219;
             blueBallPos.Y *= GraphicsDevice.Viewport.Height ;
             if (rightHand.Position.X > maxX)
                 maxX = rightHand.Position.X;
@@ -133,36 +140,45 @@ namespace Punch
                 maxY = rightHand.Position.Y;
             if (rightHand.Position.Y < minY)
                 minY = rightHand.Position.Y;
-            Debug.WriteLine("ImpactPoint(x,y): "+ impactPoint.X + ", " + impactPoint.Y+")");
+            Debug.WriteLine("ImpactPoint(x,y): "+ redBallPos.X + ", " + redBallPos.Y+")");
             //Debug.WriteLine("RightHandPos: " + "(" + rightHand.Position.X + ", " + rightHand.Position.Y + ")" );
             Debug.WriteLine("Max X, minX, maxY, minY: " + maxX + ", " + minX + ", " + maxY + ", " + minY);
             // TODO: Add your update logic here
-            if ((int)gameTime.TotalGameTime.Milliseconds % 2000 == 0 && !criou)
+            if ((int)gameTime.TotalGameTime.Milliseconds % spawnTime == 0 && !criou)
             {
                 criou = true;
                 inimigos.Add(new Inimigo(rnd.Next(3 * inimigoText.Width / 2, width - 3 * inimigoText.Width / 2), rnd.Next(3 * inimigoText.Height / 2, height - 3 * inimigoText.Height / 2), inimigoText));
             }
-            if ((int)gameTime.TotalGameTime.Milliseconds % 2000 != 0 && criou)
+            if ((int)gameTime.TotalGameTime.Milliseconds % spawnTime != 0 && criou)
                 criou = false;
             foreach (Inimigo i in inimigos)
             {
 
                 i.Update();
-                if (i.Scale > 2)
+                if (i.Scale > 2.5)
                 {
-                    player.health--;
+                    health--;
                     red = true;
                     removeList.Add(i);
                 }
-                if (i.Hit(impactPoint))
+                if (i.Hit(redBallPos) || i.Hit(blueBallPos) )
                 {
                     removeList.Add(i);
+                    score += 20;
+                    if ((score - lastScore) > 100000 / spawnTime)
+                    {
+                        lastScore = score;
+                        if (spawnTime - 500 > 0)
+                        {
+                            spawnTime -= 500;
+                        }
+                    }
                 }
             }
             foreach (Inimigo i in removeList)
                 inimigos.Remove(i);
             removeList.Clear();
-            Debug.WriteLine(player.health);
+            Debug.WriteLine(health);
 
             base.Update(gameTime);
         }
@@ -185,11 +201,11 @@ namespace Punch
                 i.Draw(spriteBatch);
                 
             }
-            if (impactPoint != new Vector2(GraphicsDevice.Viewport.Width * (float)1.2 / 2, 0))
-            {
-                spriteBatch.Draw(redball, impactPoint, Color.White);
-                spriteBatch.Draw(blueball, blueBallPos, Color.White);
-            }
+            spriteBatch.Draw(redball, new Rectangle((int)redBallPos.X - redball.Width/2,(int) redBallPos.Y - redball.Height/2, redball.Width, redball.Height), Color.White);
+            spriteBatch.Draw(blueball, new Rectangle((int)blueBallPos.X - blueball.Width/2,(int) blueBallPos.Y - blueball.Height/2, blueball.Width, blueball.Height), Color.White);
+            spriteBatch.DrawString(fonte, "Score:" + score, new Vector2(0, 0), Color.White);
+            spriteBatch.DrawString(fonte, "Health:" + health, new Vector2(0, 40), Color.White);
+            spriteBatch.DrawString(fonte, "Level:" + (5500 - spawnTime) / 500, new Vector2(0, 80), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
