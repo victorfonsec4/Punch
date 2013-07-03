@@ -23,6 +23,7 @@ namespace Punch
         SpriteBatch spriteBatch;
         Texture2D inimigoText;
         List<Inimigo> inimigos;
+        List<Inimigo> removeList;
         Random rnd;
         bool criou;
         int height = 480;
@@ -52,6 +53,7 @@ namespace Punch
         {
             // TODO: Add your initialization logic here
             inimigos = new List<Inimigo>();
+            removeList = new List<Inimigo>();
             rnd = new Random();
             criou = false;
             kinect = KinectSensor.KinectSensors[0];
@@ -99,23 +101,31 @@ namespace Punch
             impactPoint = player.Update(new Vector3(rightHand.Position.X, rightHand.Position.Y, rightHand.Position.Z), new Vector3 (leftHand.Position.X, leftHand.Position.Y, leftHand.Position.Z) );
             Debug.WriteLine("ImpactPoint(x,y): "+ impactPoint.X + ", " + impactPoint.Y+")");
             // TODO: Add your update logic here
-            if ((int)gameTime.TotalGameTime.Milliseconds % 500 == 0 && !criou)
+            if ((int)gameTime.TotalGameTime.Milliseconds % 2000 == 0 && !criou)
             {
                 criou = true;
                 inimigos.Add(new Inimigo(rnd.Next(3 * inimigoText.Width / 2, width - 3 * inimigoText.Width / 2), rnd.Next(3 * inimigoText.Height / 2, height - 3 * inimigoText.Height / 2), inimigoText));
             }
-            if ((int)gameTime.TotalGameTime.Milliseconds % 500 != 0 && criou)
+            if ((int)gameTime.TotalGameTime.Milliseconds % 2000 != 0 && criou)
                 criou = false;
             foreach (Inimigo i in inimigos)
             {
+
                 i.Update();
                 if (i.Scale > 2)
                 {
-                    inimigos.Remove(i);
-                    break;
+                    player.health--;
+                    removeList.Add(i);
+                }
+                if (i.Hit(impactPoint))
+                {
+                    removeList.Add(i);
                 }
             }
-
+            foreach (Inimigo i in removeList)
+                inimigos.Remove(i);
+            removeList.Clear();
+            Debug.WriteLine(player.health);
 
             base.Update(gameTime);
         }

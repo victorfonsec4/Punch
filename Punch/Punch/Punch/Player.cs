@@ -9,7 +9,7 @@ namespace Punch
 {
     class Player
     {
-        int health;
+        public int health;
         Vector3 rightHandPos, leftHandPos, lastRightHandPos, lastLeftHandPos;
 
         public Player(int health)

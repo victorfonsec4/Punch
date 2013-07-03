@@ -28,12 +28,19 @@ namespace Punch
 
         public void Update()
         {
-            scale += 0.03f;
+            scale += 0.02f;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, pos, null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 1);
+        }
+
+        public bool Hit(Vector2 impactPoint)
+        {
+            if ((pos - impactPoint).Length() < 50)
+                return true;
+            return false;
         }
     }
 }
