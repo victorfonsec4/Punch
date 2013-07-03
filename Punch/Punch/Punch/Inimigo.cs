@@ -11,14 +11,16 @@ namespace Punch
     {
         private Vector2 pos;
         private float scale;
-        private Texture2D texture;
+        public Texture2D texture;
+        public int enemyType;
 
-        public Inimigo(float x, float y, Texture2D texture)
+        public Inimigo(float x, float y, Texture2D texture, int enemyType)
         {
             pos.X = x;
             pos.Y = y;
             this.texture = texture;
             scale = 0;
+            this.enemyType = enemyType;
         }
 
         public float Scale

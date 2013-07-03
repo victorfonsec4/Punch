@@ -38,11 +38,18 @@ namespace Punch
         int health;
         Texture2D redball;
         Texture2D blueball;
+        Texture2D redEnemyTexture;
+        Texture2D blueEnemyTexture;
+        Texture2D purpleEnemyTexture;
+        Texture2D[] enemyTextures;
+        Texture2D fundo;
         float maxX, minX, maxY, minY;
         int score;
         SpriteFont fonte;
         int spawnTime;
         int lastScore;
+        int gameOverCounter;
+        bool dead;
 
         public Punch()
         {
@@ -63,7 +70,7 @@ namespace Punch
             // TODO: Add your initialization logic here
             inimigos = new List<Inimigo>();
             removeList = new List<Inimigo>();
-            health = 100;
+            health = 20;
             rnd = new Random();
             criou = false;
             kinect = KinectSensor.KinectSensors[0];
@@ -77,6 +84,9 @@ namespace Punch
             score = 0;
             spawnTime = 5000;
             lastScore = 0;
+            gameOverCounter = 0;
+            enemyTextures = new Texture2D[3];
+            dead = false;
             base.Initialize();
         }
 
@@ -92,6 +102,13 @@ namespace Punch
             redball = Content.Load<Texture2D>("redball");
             blueball = Content.Load<Texture2D>("blueball");
             fonte = Content.Load<SpriteFont>("fonte");
+            blueEnemyTexture = Content.Load <Texture2D>("blue");
+            purpleEnemyTexture = Content.Load<Texture2D>("purple");
+            redEnemyTexture = Content.Load<Texture2D>("red");
+            fundo = Content.Load<Texture2D>("fundo");
+            enemyTextures[0] = redEnemyTexture;
+            enemyTextures[1] = blueEnemyTexture;
+            enemyTextures[2] = purpleEnemyTexture;
 
             // TODO: use this.Content to load your game content here
         }
@@ -115,70 +132,84 @@ namespace Punch
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
-
-            red = false;
-            redBallPos = new Vector2(leftHand.Position.X, leftHand.Position.Y);
-            redBallPos.X +=(float)0.5997291;
-            redBallPos.X /= (float)0.7665651;
-            redBallPos.X *= GraphicsDevice.Viewport.Width;
-            redBallPos.Y *= -1;
-            redBallPos.Y += (float)0.8524219;
-            redBallPos.Y /= (float)0.8524219;
-            redBallPos.Y *= GraphicsDevice.Viewport.Height;
-            blueBallPos = new Vector2(rightHand.Position.X, rightHand.Position.Y*-1);
-            blueBallPos.X += (float)0.5997291;
-            blueBallPos.X /= (float)0.7665651;
-            blueBallPos.X *= GraphicsDevice.Viewport.Width;
-            blueBallPos.Y += (float)0.8524219;
-            blueBallPos.Y /= (float)0.8524219;
-            blueBallPos.Y *= GraphicsDevice.Viewport.Height ;
-            if (rightHand.Position.X > maxX)
-                maxX = rightHand.Position.X;
-            if (rightHand.Position.X < minX)
-                minX = rightHand.Position.X;
-            if (rightHand.Position.Y > maxY)
-                maxY = rightHand.Position.Y;
-            if (rightHand.Position.Y < minY)
-                minY = rightHand.Position.Y;
-            Debug.WriteLine("ImpactPoint(x,y): "+ redBallPos.X + ", " + redBallPos.Y+")");
-            //Debug.WriteLine("RightHandPos: " + "(" + rightHand.Position.X + ", " + rightHand.Position.Y + ")" );
-            Debug.WriteLine("Max X, minX, maxY, minY: " + maxX + ", " + minX + ", " + maxY + ", " + minY);
-            // TODO: Add your update logic here
-            if ((int)gameTime.TotalGameTime.Milliseconds % spawnTime == 0 && !criou)
+            if (dead == false)
             {
-                criou = true;
-                inimigos.Add(new Inimigo(rnd.Next(3 * inimigoText.Width / 2, width - 3 * inimigoText.Width / 2), rnd.Next(3 * inimigoText.Height / 2, height - 3 * inimigoText.Height / 2), inimigoText));
-            }
-            if ((int)gameTime.TotalGameTime.Milliseconds % spawnTime != 0 && criou)
-                criou = false;
-            foreach (Inimigo i in inimigos)
-            {
-
-                i.Update();
-                if (i.Scale > 2.5)
+                red = false;
+                redBallPos = new Vector2(leftHand.Position.X, leftHand.Position.Y);
+                redBallPos.X += (float)0.5997291;
+                redBallPos.X /= (float)0.7665651;
+                redBallPos.X *= GraphicsDevice.Viewport.Width;
+                redBallPos.Y *= -1;
+                redBallPos.Y += (float)0.8524219;
+                redBallPos.Y /= (float)0.8524219;
+                redBallPos.Y *= GraphicsDevice.Viewport.Height;
+                blueBallPos = new Vector2(rightHand.Position.X, rightHand.Position.Y * -1);
+                blueBallPos.X += (float)0.5997291;
+                blueBallPos.X /= (float)0.7665651;
+                blueBallPos.X *= GraphicsDevice.Viewport.Width;
+                blueBallPos.Y += (float)0.8524219;
+                blueBallPos.Y /= (float)0.8524219;
+                blueBallPos.Y *= GraphicsDevice.Viewport.Height;
+                if (rightHand.Position.X > maxX)
+                    maxX = rightHand.Position.X;
+                if (rightHand.Position.X < minX)
+                    minX = rightHand.Position.X;
+                if (rightHand.Position.Y > maxY)
+                    maxY = rightHand.Position.Y;
+                if (rightHand.Position.Y < minY)
+                    minY = rightHand.Position.Y;
+                Debug.WriteLine("ImpactPoint(x,y): " + redBallPos.X + ", " + redBallPos.Y + ")");
+                //Debug.WriteLine("RightHandPos: " + "(" + rightHand.Position.X + ", " + rightHand.Position.Y + ")" );
+                Debug.WriteLine("Max X, minX, maxY, minY: " + maxX + ", " + minX + ", " + maxY + ", " + minY);
+                // TODO: Add your update logic here
+                if ((int)gameTime.TotalGameTime.Milliseconds % spawnTime == 0 && !criou)
                 {
-                    health--;
-                    red = true;
-                    removeList.Add(i);
+                    criou = true;
+                    inimigos.Add(new Inimigo(rnd.Next(3 * inimigoText.Width / 2, width - 3 * inimigoText.Width / 2), rnd.Next(3 * inimigoText.Height / 2, height - 3 * inimigoText.Height / 2), inimigoText, rnd.Next(0, 3)));
                 }
-                if (i.Hit(redBallPos) || i.Hit(blueBallPos) )
+                if ((int)gameTime.TotalGameTime.Milliseconds % spawnTime != 0 && criou)
+                    criou = false;
+                foreach (Inimigo i in inimigos)
                 {
-                    removeList.Add(i);
-                    score += 20;
-                    if ((score - lastScore) > 100000 / spawnTime)
+
+                    i.Update();
+                    if (i.Scale > 1.5)
                     {
-                        lastScore = score;
-                        if (spawnTime - 500 > 0)
+                        i.texture = enemyTextures[i.enemyType];
+                    }
+                    if (i.Scale > 2.5)
+                    {
+                        health -= 1;
+                        if (health <= 0)
+                            dead = true;
+                        red = true;
+                        removeList.Add(i);
+                    }
+                    if ((i.Hit(redBallPos) && (i.enemyType == 0 || i.enemyType == 2)) || (i.Hit(blueBallPos) && (i.enemyType == 1 || i.enemyType == 2)) && i.Scale > 1.6)
+                    {
+                        removeList.Add(i);
+                        score += 20;
+                        if ((score - lastScore) > 100000 / spawnTime)
                         {
-                            spawnTime -= 500;
+                            lastScore = score;
+                            if (spawnTime - 500 > 0)
+                            {
+                                spawnTime -= 500;
+                            }
                         }
                     }
                 }
+                foreach (Inimigo i in removeList)
+                    inimigos.Remove(i);
+                removeList.Clear();
+                Debug.WriteLine(health);
             }
-            foreach (Inimigo i in removeList)
-                inimigos.Remove(i);
-            removeList.Clear();
-            Debug.WriteLine(health);
+            else
+            {
+                gameOverCounter += gameTime.ElapsedGameTime.Milliseconds;
+                if(gameOverCounter > 4000)
+                    this.Exit();
+            }
 
             base.Update(gameTime);
         }
@@ -192,20 +223,30 @@ namespace Punch
             if(red)
                 GraphicsDevice.Clear(Color.Red);
             else
-                GraphicsDevice.Clear(Color.CornflowerBlue);
+                GraphicsDevice.Clear(Color.Green);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            foreach (Inimigo i in inimigos)
+            if (dead == false)
             {
-                i.Draw(spriteBatch);
-                
+                spriteBatch.Draw(fundo, new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), Color.White);
+                foreach (Inimigo i in inimigos)
+                {
+                    i.Draw(spriteBatch);
+
+                }
+                spriteBatch.Draw(redball, new Rectangle((int)redBallPos.X - redball.Width / 2, (int)redBallPos.Y - redball.Height / 2, redball.Width, redball.Height), Color.White);
+                spriteBatch.Draw(blueball, new Rectangle((int)blueBallPos.X - blueball.Width / 2, (int)blueBallPos.Y - blueball.Height / 2, blueball.Width, blueball.Height), Color.White);
+                spriteBatch.DrawString(fonte, "Score:" + score, new Vector2(0, 0), Color.White);
+                spriteBatch.DrawString(fonte, "Health:" + health, new Vector2(0, 40), Color.White);
+                spriteBatch.DrawString(fonte, "Level:" + (5500 - spawnTime) / 500, new Vector2(0, 80), Color.White);
             }
-            spriteBatch.Draw(redball, new Rectangle((int)redBallPos.X - redball.Width/2,(int) redBallPos.Y - redball.Height/2, redball.Width, redball.Height), Color.White);
-            spriteBatch.Draw(blueball, new Rectangle((int)blueBallPos.X - blueball.Width/2,(int) blueBallPos.Y - blueball.Height/2, blueball.Width, blueball.Height), Color.White);
-            spriteBatch.DrawString(fonte, "Score:" + score, new Vector2(0, 0), Color.White);
-            spriteBatch.DrawString(fonte, "Health:" + health, new Vector2(0, 40), Color.White);
-            spriteBatch.DrawString(fonte, "Level:" + (5500 - spawnTime) / 500, new Vector2(0, 80), Color.White);
+            else
+            {
+                GraphicsDevice.Clear(Color.Black);
+                spriteBatch.DrawString(fonte, "Game Over", new Vector2(GraphicsDevice.Viewport.Width / 2 - 40, GraphicsDevice.Viewport.Height / 2 - 40), Color.Red);
+                spriteBatch.DrawString(fonte, "Score:" + score, new Vector2(GraphicsDevice.Viewport.Width / 2 - 40, GraphicsDevice.Viewport.Height / 2 ), Color.Red);
+            }
             spriteBatch.End();
 
             base.Draw(gameTime);
