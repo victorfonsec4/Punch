@@ -220,10 +220,6 @@ namespace Punch
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            if(red)
-                GraphicsDevice.Clear(Color.Red);
-            else
-                GraphicsDevice.Clear(Color.Green);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
@@ -249,6 +245,8 @@ namespace Punch
             }
             spriteBatch.End();
 
+            if(red)
+                GraphicsDevice.Clear(Color.Red);
             base.Draw(gameTime);
         }
 
