@@ -26,6 +26,7 @@ namespace Punch
         List<Inimigo> removeList;
         Random rnd;
         bool criou;
+        Vector2 impactPoint;
         int height = 480;
         int width = 720;
         KinectSensor kinect;
@@ -34,6 +35,7 @@ namespace Punch
         Skeleton[] skeletonData;
         Skeleton skeleton;
         Player player;
+        Texture2D redball;
 
         public Punch()
         {
@@ -73,6 +75,7 @@ namespace Punch
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             inimigoText = Content.Load<Texture2D>("Inimigo");
+            redball = Content.Load<Texture2D>("redball");
 
             // TODO: use this.Content to load your game content here
         }
@@ -93,12 +96,18 @@ namespace Punch
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            Vector2 impactPoint;
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
             
-            impactPoint = player.Update(new Vector3(rightHand.Position.X, rightHand.Position.Y, rightHand.Position.Z), new Vector3 (leftHand.Position.X, leftHand.Position.Y, leftHand.Position.Z) );
+            impactPoint = player.Update(new Vector3(rightHand.Position.X, rightHand.Position.Y, rightHand.Position.Z), new Vector3 (leftHand.Position.X, leftHand.Position.Y, leftHand.Position.Z), gameTime);
+            impactPoint.X += 1;
+            impactPoint.Y += 1;
+            impactPoint.X /= 2;
+            impactPoint.Y /= 2;
+            impactPoint.X *= GraphicsDevice.Viewport.Width;
+            impactPoint.Y *= GraphicsDevice.Viewport.Height;
+
             Debug.WriteLine("ImpactPoint(x,y): "+ impactPoint.X + ", " + impactPoint.Y+")");
             // TODO: Add your update logic here
             if ((int)gameTime.TotalGameTime.Milliseconds % 2000 == 0 && !criou)
@@ -143,6 +152,10 @@ namespace Punch
             foreach (Inimigo i in inimigos)
             {
                 i.Draw(spriteBatch);
+                if (impactPoint != Vector2.Zero)
+                {
+                    spriteBatch.Draw(redball, impactPoint, Color.White);
+                }
             }
             spriteBatch.End();
 
