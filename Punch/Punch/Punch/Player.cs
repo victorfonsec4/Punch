@@ -21,13 +21,13 @@ namespace Punch
             lastRightHandPos = Vector3.Zero;
         }
 
-        public Vector2 Update(Vector3 rightHandPos, Vector3 leftHandPos)
+        public Vector2 Update(Vector3 rightHandPos, Vector3 leftHandPos, GameTime gameTime)
         {
             this.rightHandPos = rightHandPos;
             this.leftHandPos = leftHandPos;
-            if (lastLeftHandPos.Z - leftHandPos.Z > 0.5)
+            if (lastLeftHandPos.Z - leftHandPos.Z > 0.1)
                 return new Vector2(leftHandPos.X, leftHandPos.Y);
-            else if (lastRightHandPos.Z - rightHandPos.Z > 0.5)
+            else if (lastRightHandPos.Z - rightHandPos.Z > 0.1)
                 return new Vector2(rightHandPos.X, rightHandPos.Y);
             Debug.WriteLine("RightHandPos.Z:" + rightHandPos.Z);
             Debug.WriteLine("LastRightHandPos.Z:" + lastRightHandPos.Z);
