@@ -29,8 +29,8 @@ namespace Punch
                 return new Vector2(leftHandPos.X, leftHandPos.Y);
             else if (lastRightHandPos.Z - rightHandPos.Z > 0.1)
                 return new Vector2(rightHandPos.X, rightHandPos.Y);
-            Debug.WriteLine("RightHandPos.Z:" + rightHandPos.Z);
-            Debug.WriteLine("LastRightHandPos.Z:" + lastRightHandPos.Z);
+            Debug.WriteLine("RightHandPos:" + "(" + rightHandPos.X+ ", "+rightHandPos.Y + ", " + rightHandPos.Z + ")");
+            Debug.WriteLine("lastRightHandPos:" + lastRightHandPos.X+ ", "+lastRightHandPos.Y + ", " + lastRightHandPos.Z + ")" );
             lastRightHandPos = rightHandPos;
             lastLeftHandPos = leftHandPos;
             return Vector2.Zero;
